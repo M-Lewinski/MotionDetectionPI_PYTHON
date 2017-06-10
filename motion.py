@@ -7,6 +7,7 @@ import cv2
 
 class Movement:
     def __init__(self):
+        GPIO.setmode(GPIO.BOARD)
         # Pins
         self.LASER_PIN = 4
         self.STEP_X = 17
@@ -19,17 +20,60 @@ class Movement:
 
         # Constant values
         self.STEP = 17.77
-        self.DELA_Y = 500
-        self.MIN_X = -66.0
-        self.MIN_Y = -66.0
-        self.MAX_X = 66.0
-        self.MAX_Y = 66.0
+        self.DELAY = 10000
+        self.MIN_X = -130.0
+        self.MIN_Y = -130.0
+        self.MAX_X = 130.0
+        self.MAX_Y = 130.0
 
         # Move variables
-        self.nowX = 0.0
-        self.nowY = 0.0
-        self.nowX2 = 0.0
-        self.nowY2 = 0.0
+        self.now_x = 0.0
+        self.now_y = 0.0
+        self.now_x2 = 0.0
+        self.now_y2 = 0.0
+
+        #Pin setup
+        GPIO.setup(self.LASER_PIN, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.END_X, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.END_Y, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.STEP_X, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.DIR_X, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.STEP_Y, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.DIR_Y, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.MOTOR_ENABLE, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.output(self.DIR_X, GPIO.LOW)
+        GPIO.output(self.DIR_Y, GPIO.LOW)
+        GPIO.output(self.MOTOR_ENABLE, GPIO.LOW)
+
+    def laser_on(self):
+        GPIO.output(self.LASER_PIN, GPIO.HIGH)
+
+    def laser_off(self):
+        GPIO.output(self.LASER_PIN, GPIO.LOW)
+
+    def delay(self,microseconds):
+        time.sleep(microseconds/1000000)
+
+    def calibrate(self):
+        while GPIO.input(self.END_X) == GPIO.HIGH:
+            GPIO.output(self.STEP_X, GPIO.HIGH)
+            self.delay(self.DELAY)
+            GPIO.output(self.STEP_X, GPIO.LOW)
+            self.delay(self.DELAY)
+        while GPIO.input(self.END_Y) == GPIO.HIGH:
+            GPIO.output(self.STEP_Y, GPIO.HIGH)
+            self.delay(self.DELAY)
+            GPIO.output(self.STEP_Y, GPIO.LOW)
+            self.delay(self.DELAY)
+        self.now_x = self.MIN_X
+        self.now_y = self.MIN_Y
+
+    def move(self,angle_x,angle_y,scale = 1):
+        if angle_x >= 0.0:
+            GPIO.output(self.DIR_X, GPIO.HIGH)
+        else:
+            GPIO.output(self.DIR_X, GPIO.LOW)
+
 
 
 class FPS:
@@ -90,12 +134,13 @@ def cameraControl(config):
         image = frame.array
         fps = fpsCounter.fps()
         fpsCounter.draw_text(image, "{:.3f}".format(fps), 30, 30)
-        rememberFrame, image = findMotion(image, rememberFrame, config)
+        # rememberFrame, image = findMotion(image, rememberFrame, config)
         cv2.imshow("Primary", image)
         rawCapture.truncate(0)  # Clear capture for the next frame
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
+    GPIO.cleanup()
     cv2.destroyAllWindows()
 
 
