@@ -20,7 +20,7 @@ class Movement:
 
         # Constant values
         self.STEP = 17.77
-        self.DELAY = 10000
+        self.DELAY = 5000
         self.MIN_X = -130.0
         self.MIN_Y = -130.0
         self.MAX_X = 130.0
@@ -41,8 +41,8 @@ class Movement:
         GPIO.setup(self.STEP_Y, GPIO.OUT)
         GPIO.setup(self.DIR_Y, GPIO.OUT)
         GPIO.setup(self.MOTOR_ENABLE, GPIO.OUT)
-        GPIO.output(self.DIR_X, GPIO.LOW)
-        GPIO.output(self.DIR_Y, GPIO.LOW)
+        GPIO.output(self.DIR_X, GPIO.HIGH)
+        GPIO.output(self.DIR_Y, GPIO.HIGH)
         GPIO.output(self.MOTOR_ENABLE, GPIO.LOW)
 
     def laser_on(self):
