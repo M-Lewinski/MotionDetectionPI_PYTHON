@@ -33,16 +33,17 @@ class Movement:
         self.now_y2 = 0.0
 
         #Pin setup
-        GPIO.setup(self.LASER_PIN, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.LASER_PIN, GPIO.OUT)
         GPIO.setup(self.END_X, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.END_Y, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.STEP_X, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.DIR_X, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.STEP_Y, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.DIR_Y, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.setup(self.MOTOR_ENABLE, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.STEP_X, GPIO.OUT)
+        GPIO.setup(self.DIR_X, GPIO.OUT)
+        GPIO.setup(self.STEP_Y, GPIO.OUT)
+        GPIO.setup(self.DIR_Y, GPIO.OUT)
+        GPIO.setup(self.MOTOR_ENABLE, GPIO.OUT)
         GPIO.output(self.DIR_X, GPIO.LOW)
         GPIO.output(self.DIR_Y, GPIO.LOW)
+        GPIO.output(self.MOTOR_ENABLE, GPIO.LOW)
 
     def laser_on(self):
         GPIO.output(self.LASER_PIN, GPIO.HIGH)

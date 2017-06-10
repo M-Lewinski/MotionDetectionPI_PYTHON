@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="acede26d-d5ea-44a8-a169-34142da25c75" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json.conf" afterPath="$PROJECT_DIR$/json.conf" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/motion.py" afterPath="$PROJECT_DIR$/motion.py" />
     </list>
     <ignored path="MotionDetectionPI_PYTHON.iws" />
@@ -53,8 +52,8 @@
       <file leaf-file-name="motion.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/motion.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="174" column="23" selection-start-line="174" selection-start-column="23" selection-end-line="174" selection-end-column="23" />
+            <state relative-caret-position="571">
+              <caret line="45" column="37" selection-start-line="45" selection-start-column="37" selection-end-line="45" selection-end-column="37" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
               </folding>
@@ -521,8 +520,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/motion.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="174" column="23" selection-start-line="174" selection-start-column="23" selection-end-line="174" selection-end-column="23" />
+        <state relative-caret-position="571">
+          <caret line="45" column="37" selection-start-line="45" selection-start-column="37" selection-end-line="45" selection-end-column="37" />
           <folding>
             <element signature="e#0#37#0" expanded="true" />
           </folding>
