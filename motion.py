@@ -193,6 +193,7 @@ def cameraControl(config):
                 movement.center()
                 startTime = None
                 endTime = None
+                rememberFrame = None
         if config['show_video'] is True:
             cv2.imshow("Primary", image)
         rawCapture.truncate(0)  # Clear capture for the next frame
@@ -217,7 +218,7 @@ def findMotion(image, rememberFrame, config, movement):
 
     #cv2.imshow("DIFF", frameDelta)
 
-    thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(frameDelta, 30, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
     (_, contours, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
@@ -244,7 +245,7 @@ def findMotion(image, rememberFrame, config, movement):
             #if target['distance'] < fig['distance']:
             if abs(target["delta_x"]*target["delta_y"]) < abs(fig["delta_x"]*fig["delta_y"]):
                 target = fig
-        cv2.rectangle(image, (fig['Pos_x'], fig['width']), (fig['Pos_x'] + fig['Pos_y'], fig['width']+ fig['height']), (0, 255, 0), 2)
+        #cv2.rectangle(image, (fig['Pos_x'], fig['width']), (fig['Pos_x'] + fig['Pos_y'], fig['width']+ fig['height']), (0, 255, 0), 2)
     if target is not None:
         print(target)
         if abs(target['delta_x']) > config['delta'] or abs(target['delta_y']) > config['delta']:
@@ -257,9 +258,9 @@ def findMotion(image, rememberFrame, config, movement):
             if inBoundries is False:
                 movement.center()
             movement.laser_on()
-            movement.delay(5000)
+            movement.delay(6000)
             movement.laser_off()
-            movement.delay(10000)
+            movement.delay(6000)
             return None
 
     return grayImage
