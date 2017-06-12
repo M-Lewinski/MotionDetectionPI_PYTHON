@@ -215,7 +215,7 @@ def findMotion(image, rememberFrame, config, movement):
     #frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
     frameDelta = cv2.absdiff(grayImage, rememberFrame)
 
-    cv2.imshow("DIFF", frameDelta)
+    #cv2.imshow("DIFF", frameDelta)
 
     thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
 
