@@ -2,8 +2,10 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import RPi.GPIO as GPIO
 import time
+import math
 import datetime
 import cv2
+import copy
 
 class Movement:
     def __init__(self):
@@ -20,11 +22,11 @@ class Movement:
 
         # Constant values
         self.STEP = 17.77
-        self.DELAY = 5000
-        self.MIN_X = -130.0
-        self.MIN_Y = -130.0
-        self.MAX_X = 130.0
-        self.MAX_Y = 130.0
+        self.DELAY = 500
+        self.MIN_X = -135.0
+        self.MIN_Y = -135.0
+        self.MAX_X = 120.0
+        self.MAX_Y = 120.0
 
         # Move variables
         self.now_x = 0.0
@@ -67,47 +69,51 @@ class Movement:
             self.delay(self.DELAY)
         self.now_x = self.MIN_X
         self.now_y = self.MIN_Y
+        self.move(-self.now_x, -self.now_y, calibration=True)
 
-    def move(self,angle_x,angle_y,multiplier  = 1):
+    def move(self,angle_x,angle_y,multiplier=1, calibration=False):
         positive_x = True
         positive_y = True
         if angle_x >= 0.0:
-            GPIO.output(self.DIR_X, GPIO.HIGH)
-        else:
             GPIO.output(self.DIR_X, GPIO.LOW)
+        else:
+            GPIO.output(self.DIR_X, GPIO.HIGH)
             positive_x = False
         if angle_y >= 0.0:
-            GPIO.output(self.DIR_Y, GPIO.HIGH)
-        else:
             GPIO.output(self.DIR_Y, GPIO.LOW)
+        else:
+            GPIO.output(self.DIR_Y, GPIO.HIGH)
             positive_y = False
         angle_x = abs(angle_x)
         angle_y = abs(angle_y)
 
-        while GPIO.input(self.END_X) == GPIO.HIGH or GPIO.input(self.END_Y) == GPIO.HIGH:
-            if angle_x >= 0.0:
+        while calibration or GPIO.input(self.END_X) == GPIO.HIGH or GPIO.input(self.END_Y) == GPIO.HIGH:
+            if angle_x > 0.0:
                 GPIO.output(self.STEP_X, GPIO.HIGH)
-                if positive_x:
+                if positive_x is True:
                     self.now_x += 1.0/self.STEP
                 else:
                     self.now_x -= 1.0/self.STEP
                 angle_x -= 1.0/self.STEP
-            if angle_y >= 0.0:
+            if angle_y > 0.0:
                 GPIO.output(self.STEP_Y, GPIO.HIGH)
-                if positive_y:
+                if positive_y is True:
                     self.now_y += 1.0 / self.STEP
                 else:
                     self.now_y -= 1.0 / self.STEP
                 angle_y -= 1.0 / self.STEP
-            self.delay(self.DELAY*multiplier)
+            self.delay(self.DELAY/multiplier)
             GPIO.output(self.STEP_X, GPIO.LOW)
             GPIO.output(self.STEP_Y, GPIO.LOW)
-            self.delay(self.DELAY*multiplier)
-            if self.MAX_X <= self.now_x <= self.MIN_X or self.MAX_Y <= self.now_y <= self.MIN_Y:
+            self.delay(self.DELAY/multiplier)
+            if not (self.MIN_X <= self.now_x <= self.MAX_X) or not (self.MIN_Y <= self.now_y <= self.MAX_Y):
                 return False
             if angle_x <= 0.0 and angle_y <= 0.0:
                 break
         return True
+
+    def center(self):
+        self.move(-self.now_x, -self.now_y, multiplier=4)
 
 
 class FPS:
@@ -156,6 +162,8 @@ class FPS:
 
 
 def cameraControl(config):
+    movement = Movement()
+    movement.calibrate()
     camera = PiCamera()
     res = tuple(config["resolution"])
     camera.resolution = res
@@ -164,14 +172,29 @@ def cameraControl(config):
     time.sleep(config["camera_warmup_time"])
     rememberFrame = None
     fpsCounter = FPS()
-    movement = Movement()
-    movement.calibrate()
+    startTime = None
+    endTime = None
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         image = frame.array
-        fps = fpsCounter.fps()
-        fpsCounter.draw_text(image, "{:.3f}".format(fps), 30, 30)
-        # rememberFrame, image = findMotion(image, rememberFrame, config, movement)
-        cv2.imshow("Primary", image)
+        # fps = fpsCounter.fps()
+        # fpsCounter.draw_text(image, "{:.3f}".format(fps), 30, 30)
+        
+        if startTime is None:
+            startTime = datetime.datetime.now()
+        else:
+            endTime = datetime.datetime.now()
+        
+        rememberFrame = findMotion(image, rememberFrame, config, movement)
+        if rememberFrame is None:
+            startTime = None
+            endTime = None
+        if endTime is not None:
+            if (endTime - startTime).total_seconds() >= 5.0:
+                movement.center()
+                startTime = None
+                endTime = None
+        if config['show_video'] is True:
+            cv2.imshow("Primary", image)
         rawCapture.truncate(0)  # Clear capture for the next frame
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
@@ -181,14 +204,20 @@ def cameraControl(config):
 
 
 def findMotion(image, rememberFrame, config, movement):
-    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image_cpy = copy.copy(image)
+
+    grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
     grayImage = cv2.GaussianBlur(grayImage, (21, 21), 0)
     if rememberFrame is None:
-        return grayImage, image
-    frameDelta = cv2.absdiff(rememberFrame, grayImage)
-    # cv2.imshow("DIFF", frameDelta)
+        # return grayImage.copy().astype("float"), image
+        return grayImage
+    #cv2.accumulateWeighted(grayImage, rememberFrame, 0.5)
+    #frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
+    frameDelta = cv2.absdiff(grayImage, rememberFrame)
 
-    thresh = cv2.threshold(frameDelta, 35, 255, cv2.THRESH_BINARY)[1]
+    cv2.imshow("DIFF", frameDelta)
+
+    thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
     (_, contours, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
@@ -197,28 +226,40 @@ def findMotion(image, rememberFrame, config, movement):
     for c in contours:
         if cv2.contourArea(c) < config["min_area"]:
             continue
-        (pos_x, pos_y, width, height) = cv2.boundingRect(c)
+        pos_x, pos_y, width, height = cv2.boundingRect(c)
         interserct = False
         if not interserct:
             figures.append({'Pos_x': pos_x, 'Pos_y': pos_y, 'width': width, 'height': height})
-    if len(figures) > 0:
-        rememberFrame = None
+    #if len(figures) > 0:
+    #    rememberFrame = None
+    
     target = None
     for fig in figures:
-        fig['delta_x'] = (fig['Pos_x'] + fig['width']/2) - (config["resolution"][0]/2)
-        fig['delta_y'] = (fig['Pos_y'] + fig['height'] / 2) - (config["resolution"][1]/2)
-        fig["distance"] = fig['delta_x']**2 + fig['delta_y']**2
+        fig['delta_x'] = (fig['Pos_x'] + (fig['width']/2)) - (config["resolution"][0]/2)
+        fig['delta_y'] = (fig['Pos_y'] + (fig['height']/2)) - (config["resolution"][1]/2)
+        fig['distance'] = math.sqrt(fig['delta_x']**2 + fig['delta_y']**2)
         if target is None:
             target = fig
         else:
-            if target["distance"] < fig["distance"]:
+            #if target['distance'] < fig['distance']:
+            if abs(target["delta_x"]*target["delta_y"]) < abs(fig["delta_x"]*fig["delta_y"]):
                 target = fig
         cv2.rectangle(image, (fig['Pos_x'], fig['width']), (fig['Pos_x'] + fig['Pos_y'], fig['width']+ fig['height']), (0, 255, 0), 2)
     if target is not None:
-        if target['delta_x'] > config['delta'] or target['delta_y'] > config['delta']:
-            if abs(target['delta_x']) < config['delta']: target['delta_x'] = 0.0
-            if abs(target['delta_y']) < config['delta']: target['delta_y'] = 0.0
-            inBoundries = movement.move()
+        print(target)
+        if abs(target['delta_x']) > config['delta'] or abs(target['delta_y']) > config['delta']:
+            # if abs(target['delta_x']) < config['delta']: target['delta_x'] = 0.0
+            # if abs(target['delta_y']) < config['delta']: target['delta_y'] = 0.0
+            angle_x = (target['delta_x']/config["resolution"][0])*config['angle_view'][0]
+            angle_y = (target['delta_y'] / config["resolution"][1]) * config['angle_view'][1]
 
+            inBoundries = movement.move(angle_x,angle_y,multiplier=10)
+            if inBoundries is False:
+                movement.center()
+            movement.laser_on()
+            movement.delay(5000)
+            movement.laser_off()
+            movement.delay(10000)
+            return None
 
-    return rememberFrame, image
+    return grayImage
