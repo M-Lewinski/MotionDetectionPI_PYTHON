@@ -4,7 +4,8 @@ import math
 import datetime
 import time
 from utils.fps import FPS
-
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 from utils.motion import Movement
 
 
@@ -163,8 +164,8 @@ def find_motion(image, rememberFrame, config, movement: Movement):
         if abs(target['delta_x']) > config['delta'] or abs(target['delta_y']) > config['delta']:
             # if abs(target['delta_x']) < config['delta']: target['delta_x'] = 0.0
             # if abs(target['delta_y']) < config['delta']: target['delta_y'] = 0.0
-            angle_x = (target['delta_x'] / config["resolution"][0]) * config['angle_view'][0]
-            angle_y = (target['delta_y'] / config["resolution"][1]) * config['angle_view'][1]
+            target['angle_x'] = (target['delta_x'] / config["resolution"][0]) * config['angle_view'][0]
+            target['angle_y'] = (target['delta_y'] / config["resolution"][1]) * config['angle_view'][1]
 
             inBoundries = movement.move(angle_x, angle_y, multiplier=10)
             if inBoundries is False:

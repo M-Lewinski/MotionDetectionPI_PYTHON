@@ -5,7 +5,7 @@ import datetime
 import numpy as np
 
 
-def findMotion(image, rememberFrame, config,currentFrame, frameCount, summary):
+def findMotion(image, rememberFrame, config, current_frame, frame_count, summary):
     target = None
     image_cpy = copy.copy(image)
     grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
@@ -19,9 +19,9 @@ def findMotion(image, rememberFrame, config,currentFrame, frameCount, summary):
         summary = np.array(thresh)
     else:
         summary = summary + np.array(thresh)
-    if currentFrame < frameCount:
+    if current_frame < frame_count:
         return rememberFrame, target,summary
-    summary = np.array(summary)/frameCount
+    summary = np.array(summary) / frame_count
     cv2.imshow("DIFF", summary)
 
     (_, contours, _) = cv2.findContours(summary.astype(np.uint8).copy(), cv2.RETR_EXTERNAL,
@@ -47,14 +47,14 @@ def findMotion(image, rememberFrame, config,currentFrame, frameCount, summary):
             # if target['distance'] < fig['distance']:
             if abs(target["delta_x"] * target["delta_y"]) < abs(fig["delta_x"] * fig["delta_y"]):
                 target = fig
-        # cv2.rectangle(image, (fig['Pos_x'], fig['width']), (fig['Pos_x'] + fig['Pos_y'], fig['width']+ fig['height']), (0, 255, 0), 2)
+        cv2.rectangle(image, (fig['Pos_x'], fig['width']), (fig['Pos_x'] + fig['Pos_y'], fig['width']+ fig['height']), (0, 255, 0), 2)
     if target is not None:
         # print(target)
         # if abs(target['delta_x']) > config['delta'] or abs(target['delta_y']) > config['delta']:
         # if abs(target['delta_x']) < config['delta']: target['delta_x'] = 0.0
         # if abs(target['delta_y']) < config['delta']: target['delta_y'] = 0.0
-        angle_x = (target['delta_x'] / config["resolution"][0]) * config['angle_view'][0]
-        angle_y = (target['delta_y'] / config["resolution"][1]) * config['angle_view'][1]
+        target['angle_x'] = (target['delta_x'] / config["resolution"][0]) * config['angle_view'][0]
+        target['angle_y'] = (target['delta_y'] / config["resolution"][1]) * config['angle_view'][1]
         return None, target, summary
     return grayImage, target, summary
 
@@ -65,7 +65,6 @@ def TrackingTest2(config):
     rememberFrame = None
     startTime = None
     camera = cv2.VideoCapture(0)
-    # tracker = cv2.TrackerKCF_create()
     tracker = cv2.TrackerMedianFlow_create()
     bbox = None
     summary = None
@@ -80,7 +79,6 @@ def TrackingTest2(config):
                 bbox = (target['Pos_x'],target['Pos_y'],target['Pos_x']+target['width'],target['Pos_y']+target['height'])
                 tracker = cv2.TrackerMedianFlow_create()
                 tracker.init(image, bbox)
-                print(bbox)
                 startTime = None
         if bbox is not None:
             ok, bbox = tracker.update(image)
