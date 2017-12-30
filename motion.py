@@ -6,6 +6,7 @@ import math
 import datetime
 import cv2
 import copy
+from tracking import trackObject
 
 class Movement:
     def __init__(self):
@@ -174,26 +175,41 @@ def cameraControl(config):
     fpsCounter = FPS()
     startTime = None
     endTime = None
+
+    bbox = None
+    tracker = cv2.TrackerKCF_create()
+    center = True
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         image = frame.array
         # fps = fpsCounter.fps()
         # fpsCounter.draw_text(image, "{:.3f}".format(fps), 30, 30)
-        
-        if startTime is None:
-            startTime = datetime.datetime.now()
+        if (bbox is None):
+            bbox = cv2.selectROI(frame, False)
+            ok = tracker.init(frame, bbox)
+            if not ok:
+                exit(666)
+        # if startTime is None:
+        #     startTime = datetime.datetime.now()
+        # else:
+        #     endTime = datetime.datetime.now()
+
+        # rememberFrame = findMotion(image, rememberFrame, config, movement)
+        foundTarget, center = trackObject(image,center,tracker,config,movement)
+        # if rememberFrame is None:
+        #     startTime = None
+        #     endTime = None
+        # if endTime is not None:
+        if center is False:
+            if foundTarget is False:
+                if startTime is None:
+                    startTime = datetime.datetime.now()
+                if (endTime - startTime).total_seconds() >= 5.0:
+                    movement.center()
+                    startTime = None
+                    endTime = None
         else:
-            endTime = datetime.datetime.now()
-        
-        rememberFrame = findMotion(image, rememberFrame, config, movement)
-        if rememberFrame is None:
             startTime = None
             endTime = None
-        if endTime is not None:
-            if (endTime - startTime).total_seconds() >= 5.0:
-                movement.center()
-                startTime = None
-                endTime = None
-                rememberFrame = None
         if config['show_video'] is True:
             cv2.imshow("Primary", image)
         rawCapture.truncate(0)  # Clear capture for the next frame
@@ -204,9 +220,8 @@ def cameraControl(config):
     cv2.destroyAllWindows()
 
 
-def findMotion(image, rememberFrame, config, movement):
+def findMotion(image, rememberFrame, config, movement: Movement):
     image_cpy = copy.copy(image)
-
     grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
     grayImage = cv2.GaussianBlur(grayImage, (21, 21), 0)
     if rememberFrame is None:
