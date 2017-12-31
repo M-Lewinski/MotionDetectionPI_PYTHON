@@ -52,6 +52,7 @@ class Movement:
         time.sleep(microseconds / 1000000)
 
     def calibrate(self):
+        self.laser_off()
         while GPIO.input(self.END_X) == GPIO.HIGH:
             GPIO.output(self.STEP_X, GPIO.HIGH)
             self.delay(self.DELAY)
