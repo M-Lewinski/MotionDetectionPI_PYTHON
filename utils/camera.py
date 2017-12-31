@@ -68,14 +68,14 @@ def find_motion(frame_new, frame_old, config, movement, debug=False):
 
     # cv2.accumulateWeighted(gray_image, rememberFrame, 0.5)
     # frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
-    frame_delta_0 = cv2.absdiff(frame_new[:, :, 0], frame_old[:, :, 0])
-    frame_delta_1 = cv2.absdiff(frame_new[:, :, 1], frame_old[:, :, 1])
-    frame_delta_2 = cv2.absdiff(frame_new[:, :, 2], frame_old[:, :, 2])
+    frame_delta = cv2.absdiff(frame_new[:, :, 0], frame_old[:, :, 0]) + \
+                  cv2.absdiff(frame_new[:, :, 1], frame_old[:, :, 1]) + \
+                  cv2.absdiff(frame_new[:, :, 2], frame_old[:, :, 2])
 
     if debug:
-        cv2.imshow("DIFF", frame_delta_0)
+        cv2.imshow("DIFF", frame_delta)
 
-    thresh = cv2.threshold(frame_delta_0, 30, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(frame_delta, 30, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
     (_, contours, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
