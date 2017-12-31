@@ -7,6 +7,7 @@ import datetime
 import cv2
 import copy
 
+
 class Movement:
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
