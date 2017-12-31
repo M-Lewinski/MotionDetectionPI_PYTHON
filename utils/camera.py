@@ -19,7 +19,7 @@ def camera_control(config, debug=False):
     camera.framerate = config["fps"]
 
     raw_capture = PiRGBArray(camera, size=camera.resolution)
-    time.sleep(config["camera_warm-up_time"])
+    time.sleep(config["camera_warmup_time"])
     remember_frame = None
     fps_counter = FPS()
     start_time, end_time = None, None
