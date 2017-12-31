@@ -60,20 +60,22 @@ def find_motion(frame_new, frame_old, config, movement, debug=False):
 
     # image_cpy = copy.copy(image)
 
-    gray_frame_new = cv2.cvtColor(frame_new, cv2.COLOR_BGR2GRAY)
-    gray_frame_old = cv2.cvtColor(frame_old, cv2.COLOR_BGR2GRAY)
+    # gray_frame_new = cv2.cvtColor(frame_new, cv2.COLOR_BGR2GRAY)
+    # gray_frame_old = cv2.cvtColor(frame_old, cv2.COLOR_BGR2GRAY)
 
-    gray_image_1 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
-    gray_image_2 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
+    # gray_image_1 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
+    # gray_image_2 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
 
     # cv2.accumulateWeighted(gray_image, rememberFrame, 0.5)
     # frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
-    frame_delta = cv2.absdiff(gray_frame_new, gray_frame_old)
+    frame_delta_0 = cv2.absdiff(frame_new[:, :, 0], frame_old[:, :, 0])
+    frame_delta_1 = cv2.absdiff(frame_new[:, :, 1], frame_old[:, :, 1])
+    frame_delta_2 = cv2.absdiff(frame_new[:, :, 2], frame_old[:, :, 2])
 
     if debug:
-        cv2.imshow("DIFF", frame_delta)
+        cv2.imshow("DIFF", frame_delta_0)
 
-    thresh = cv2.threshold(frame_delta, 30, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(frame_delta_0, 30, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
     (_, contours, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
