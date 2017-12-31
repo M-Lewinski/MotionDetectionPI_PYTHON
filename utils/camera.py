@@ -52,6 +52,9 @@ def camera_control(config, debug=False):
                 cv2.imshow("Primary", image)
 
             raw_capture.truncate(0)  # Clear capture for the next frame
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
+                break
     finally:
         GPIO.cleanup()
         cv2.destroyAllWindows()
@@ -69,7 +72,8 @@ def find_motion(image, remember_frame, config, movement, debug=False):
     # frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
     frameDelta = cv2.absdiff(grayImage, remember_frame)
 
-    # cv2.imshow("DIFF", frameDelta)
+    if debug:
+        cv2.imshow("DIFF", frameDelta)
 
     thresh = cv2.threshold(frameDelta, 30, 255, cv2.THRESH_BINARY)[1]
 
