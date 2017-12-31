@@ -31,7 +31,7 @@ def camera_control(config, debug=False):
 
             frame_old = find_motion(frame_new, frame_old, config, movement, debug)
             if frame_old is None:
-                frame_new = None, None
+                frame_new = None
                 start_time = datetime.datetime.now()
                 end_time = None
 
