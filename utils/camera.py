@@ -37,7 +37,7 @@ def camera_control(config, debug=False):
             else:
                 end_time = datetime.datetime.now()
 
-            remember_frame = find_motion(image, remember_frame, config, movement)
+            remember_frame = find_motion(image, remember_frame, config, movement, debug)
             if remember_frame is None:
                 start_time = None
                 end_time = None
@@ -64,19 +64,19 @@ def camera_control(config, debug=False):
 def find_motion(image, remember_frame, config, movement, debug=False):
     image_cpy = copy.copy(image)
 
-    grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
-    grayImage = cv2.GaussianBlur(grayImage, (21, 21), 0)
+    gray_image = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
+    gray_image = cv2.GaussianBlur(gray_image, (21, 21), 0)
     if remember_frame is None:
-        # return grayImage.copy().astype("float"), image
-        return grayImage
-    # cv2.accumulateWeighted(grayImage, rememberFrame, 0.5)
-    # frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
-    frameDelta = cv2.absdiff(grayImage, remember_frame)
+        # return gray_image.copy().astype("float"), image
+        return gray_image
+    # cv2.accumulateWeighted(gray_image, rememberFrame, 0.5)
+    # frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
+    frame_delta = cv2.absdiff(gray_image, remember_frame)
 
     if debug:
-        cv2.imshow("DIFF", frameDelta)
+        cv2.imshow("DIFF", frame_delta)
 
-    thresh = cv2.threshold(frameDelta, 30, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(frame_delta, 30, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
     (_, contours, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
@@ -112,13 +112,12 @@ def find_motion(image, remember_frame, config, movement, debug=False):
             angle_x = (target['delta_x'] / config["resolution"][0]) * config['angle_view'][0]
             angle_y = (target['delta_y'] / config["resolution"][1]) * config['angle_view'][1]
 
+            movement.laser_on()
             inBoundries = movement.move(angle_x, angle_y, multiplier=10)
             if inBoundries is False:
                 movement.center()
-            movement.laser_on()
             movement.delay(6000)
             movement.laser_off()
-            movement.delay(6000)
             return None
 
-    return grayImage
+    return gray_image
