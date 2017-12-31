@@ -3,6 +3,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import RPi.GPIO as GPIO
 import cv2
+import copy
 import math
 
 from utils.fps import FPS, draw_text
@@ -57,7 +58,7 @@ def camera_control(config, debug=False):
 
 
 def find_motion(image, remember_frame, config, movement, debug=False):
-    image_cpy = image.copy(image)
+    image_cpy = copy.copy(image)
 
     grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
     grayImage = cv2.GaussianBlur(grayImage, (21, 21), 0)
