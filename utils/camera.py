@@ -54,7 +54,7 @@ def camera_control(config, debug=False):
 def find_motion(frame_new, frame_old, config, movement, debug=False):
     frame = copy.copy(frame_new)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.GaussianBlur(frame, (21, 21), 0)
+    # frame = cv2.GaussianBlur(frame, (21, 21), 0)
 
     if frame_old is None:
         return frame
@@ -111,4 +111,4 @@ def find_motion(frame_new, frame_old, config, movement, debug=False):
             time.sleep(0.1)
             return None
 
-    return frame_old
+    return frame
