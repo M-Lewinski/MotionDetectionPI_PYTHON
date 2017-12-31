@@ -21,7 +21,7 @@ def camera_control(config, debug=False):
 
     raw_capture = PiRGBArray(camera, size=camera.resolution)
     time.sleep(config["camera_warmup_time"])
-    frame_old, frame_new = None, None
+    frame_old = None
     fps_counter = FPS()
     start_time, end_time = datetime.datetime.now(), datetime.datetime.now()
     try:
@@ -31,17 +31,13 @@ def camera_control(config, debug=False):
 
             frame_old = find_motion(frame_new, frame_old, config, movement, debug)
             if frame_old is None:
-                frame_new = None
                 start_time = datetime.datetime.now()
-                end_time = None
+            elif (end_time - start_time).total_seconds() >= 5.0:
+                movement.center()
+                start_time = datetime.datetime.now()
+                frame_old = None
 
-            if end_time is not None:
-                if (end_time - start_time).total_seconds() >= 5.0:
-                    movement.center()
-                    start_time = datetime.datetime.now()
-                    frame_new, frame_old = None, None
-
-            if debug and frame_new is not None:
+            if debug:
                 fps = fps_counter.fps()
                 draw_text(frame_new, "{:.3f}".format(fps), 30, 30)
                 cv2.imshow("Primary", frame_new)
@@ -58,7 +54,7 @@ def camera_control(config, debug=False):
 def find_motion(frame_new, frame_old, config, movement, debug=False):
     frame = copy.copy(frame_new)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.GaussianBlur(frame, (5, 5), 0)
+    frame = cv2.GaussianBlur(frame, (21, 21), 0)
 
     if frame_old is None:
         return frame
@@ -112,6 +108,7 @@ def find_motion(frame_new, frame_old, config, movement, debug=False):
                 movement.center()
             movement.delay(6000)
             movement.laser_off()
+            time.sleep(4)
             return None
 
     return frame_old
