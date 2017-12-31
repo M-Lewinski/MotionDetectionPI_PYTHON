@@ -40,7 +40,7 @@ def camera_control(config, debug=False):
                     start_time = datetime.datetime.now()
                     frame_new, frame_old = None, None
 
-            if debug:
+            if debug and frame_new is not None:
                 fps = fps_counter.fps()
                 draw_text(frame_new, "{:.3f}".format(fps), 30, 30)
                 cv2.imshow("Primary", frame_new)
