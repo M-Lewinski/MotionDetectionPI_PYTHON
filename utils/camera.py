@@ -23,28 +23,23 @@ def camera_control(config, debug=False):
     time.sleep(config["camera_warmup_time"])
     remember_frame = None
     fps_counter = FPS()
-    start_time, end_time = None, None
+    start_time, end_time = datetime.datetime.now(), datetime.datetime.now()
     try:
         for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
             image = frame.array
-
-            if start_time is None:
-                start_time = datetime.datetime.now()
-            else:
-                end_time = datetime.datetime.now()
+            end_time = datetime.datetime.now()
 
             remember_frame = find_motion(image, remember_frame, config, movement, debug)
             if remember_frame is None:
-                start_time = None
+                start_time = datetime.datetime.now()
                 end_time = None
 
             if end_time is not None:
                 if (end_time - start_time).total_seconds() >= 5.0:
                     movement.center()
-                    time.sleep(1)
-                    start_time = None
-                    end_time = None
+                    start_time = datetime.datetime.now()
                     remember_frame = None
+
             if debug:
                 fps = fps_counter.fps()
                 draw_text(image, "{:.3f}".format(fps), 30, 30)

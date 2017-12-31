@@ -109,3 +109,4 @@ class Movement:
 
     def center(self):
         self.move(-self.now_x, -self.now_y, multiplier=4)
+        time.sleep(1)
