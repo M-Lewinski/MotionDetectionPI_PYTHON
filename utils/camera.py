@@ -21,16 +21,16 @@ def camera_control(config, debug=False):
 
     raw_capture = PiRGBArray(camera, size=camera.resolution)
     time.sleep(config["camera_warmup_time"])
-    remember_frame = None
+    frame_old, frame_new = None, None
     fps_counter = FPS()
     start_time, end_time = datetime.datetime.now(), datetime.datetime.now()
     try:
         for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
-            image = frame.array
+            frame_old, frame_new = frame_new, frame.array
             end_time = datetime.datetime.now()
 
-            remember_frame = find_motion(image, remember_frame, config, movement, debug)
-            if remember_frame is None:
+            if find_motion(frame_new, frame_old, config, movement, debug):
+                frame_new, frame_old = None, None
                 start_time = datetime.datetime.now()
                 end_time = None
 
@@ -38,12 +38,12 @@ def camera_control(config, debug=False):
                 if (end_time - start_time).total_seconds() >= 5.0:
                     movement.center()
                     start_time = datetime.datetime.now()
-                    remember_frame = None
+                    frame_new, frame_old = None, None
 
             if debug:
                 fps = fps_counter.fps()
-                draw_text(image, "{:.3f}".format(fps), 30, 30)
-                cv2.imshow("Primary", image)
+                draw_text(frame_new, "{:.3f}".format(fps), 30, 30)
+                cv2.imshow("Primary", frame_old)
 
             raw_capture.truncate(0)  # Clear capture for the next frame
             key = cv2.waitKey(1) & 0xFF
@@ -54,17 +54,19 @@ def camera_control(config, debug=False):
         cv2.destroyAllWindows()
 
 
-def find_motion(image, remember_frame, config, movement, debug=False):
-    image_cpy = copy.copy(image)
+def find_motion(frame_new, frame_old, config, movement, debug=False):
+    #image_cpy = copy.copy(image)
 
-    gray_image = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
-    gray_image = cv2.GaussianBlur(gray_image, (21, 21), 0)
-    if remember_frame is None:
-        # return gray_image.copy().astype("float"), image
-        return gray_image
+    gray_frame_new = cv2.cvtColor(frame_new, cv2.COLOR_BGR2GRAY)
+    gray_frame_old = cv2.cvtColor(frame_old, cv2.COLOR_BGR2GRAY)
+
+    gray_image_1 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
+    gray_image_2 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
+
+
     # cv2.accumulateWeighted(gray_image, rememberFrame, 0.5)
     # frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
-    frame_delta = cv2.absdiff(gray_image, remember_frame)
+    frame_delta = cv2.absdiff(gray_frame_new, gray_frame_old)
 
     if debug:
         cv2.imshow("DIFF", frame_delta)
@@ -111,6 +113,6 @@ def find_motion(image, remember_frame, config, movement, debug=False):
                 movement.center()
             movement.delay(6000)
             movement.laser_off()
-            return None
+            return True
 
-    return gray_image
+    return False
