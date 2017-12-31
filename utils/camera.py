@@ -45,6 +45,7 @@ def camera_control(config, debug=False):
             if end_time is not None:
                 if (end_time - start_time).total_seconds() >= 5.0:
                     movement.center()
+                    time.sleep(1)
                     start_time = None
                     end_time = None
                     remember_frame = None
