@@ -26,11 +26,12 @@ def camera_control(config, debug=False):
     start_time, end_time = datetime.datetime.now(), datetime.datetime.now()
     try:
         for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
-            frame_old, frame_new = frame_new, frame.array
+            frame_new = frame.array
             end_time = datetime.datetime.now()
 
-            if find_motion(frame_new, frame_old, config, movement, debug):
-                frame_new, frame_old = None, None
+            frame_old = find_motion(frame_new, frame_old, config, movement, debug)
+            if frame_old is None:
+                frame_new = None, None
                 start_time = datetime.datetime.now()
                 end_time = None
 
@@ -55,22 +56,16 @@ def camera_control(config, debug=False):
 
 
 def find_motion(frame_new, frame_old, config, movement, debug=False):
-    if frame_new is None or frame_old is None:
-        return False
+    frame = copy.copy(frame_new)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = cv2.GaussianBlur(frame, (5, 5), 0)
 
-    # image_cpy = copy.copy(image)
-
-    # gray_frame_new = cv2.cvtColor(frame_new, cv2.COLOR_BGR2GRAY)
-    # gray_frame_old = cv2.cvtColor(frame_old, cv2.COLOR_BGR2GRAY)
-
-    # gray_image_1 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
-    # gray_image_2 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
+    if frame_old is None:
+        return frame
 
     # cv2.accumulateWeighted(gray_image, rememberFrame, 0.5)
-    # frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
-    frame_delta = cv2.absdiff(frame_new[:, :, 0], frame_old[:, :, 0]) + \
-                  cv2.absdiff(frame_new[:, :, 1], frame_old[:, :, 1]) + \
-                  cv2.absdiff(frame_new[:, :, 2], frame_old[:, :, 2])
+    #frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
+    frame_delta = cv2.absdiff(frame, frame_old)
 
     if debug:
         cv2.imshow("DIFF", frame_delta)
