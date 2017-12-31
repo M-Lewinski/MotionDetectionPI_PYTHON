@@ -43,7 +43,7 @@ def camera_control(config, debug=False):
             if debug:
                 fps = fps_counter.fps()
                 draw_text(frame_new, "{:.3f}".format(fps), 30, 30)
-                cv2.imshow("Primary", frame_old)
+                cv2.imshow("Primary", frame_new)
 
             raw_capture.truncate(0)  # Clear capture for the next frame
             key = cv2.waitKey(1) & 0xFF
