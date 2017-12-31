@@ -28,10 +28,6 @@ def camera_control(config, debug=False):
         for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
             image = frame.array
 
-            if debug:
-                fps = fps_counter.fps()
-                draw_text(image, "{:.3f}".format(fps), 30, 30)
-
             if start_time is None:
                 start_time = datetime.datetime.now()
             else:
@@ -50,6 +46,8 @@ def camera_control(config, debug=False):
                     end_time = None
                     remember_frame = None
             if debug:
+                fps = fps_counter.fps()
+                draw_text(image, "{:.3f}".format(fps), 30, 30)
                 cv2.imshow("Primary", image)
 
             raw_capture.truncate(0)  # Clear capture for the next frame
