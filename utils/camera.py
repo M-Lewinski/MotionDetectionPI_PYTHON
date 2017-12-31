@@ -108,7 +108,7 @@ def find_motion(frame_new, frame_old, config, movement, debug=False):
                 movement.center()
             movement.delay(6000)
             movement.laser_off()
-            time.sleep(0.3)
+            time.sleep(0.1)
             return None
 
     return frame_old
