@@ -55,14 +55,16 @@ def camera_control(config, debug=False):
 
 
 def find_motion(frame_new, frame_old, config, movement, debug=False):
-    #image_cpy = copy.copy(image)
+    if frame_new is None or frame_old is None:
+        return False
+
+    # image_cpy = copy.copy(image)
 
     gray_frame_new = cv2.cvtColor(frame_new, cv2.COLOR_BGR2GRAY)
     gray_frame_old = cv2.cvtColor(frame_old, cv2.COLOR_BGR2GRAY)
 
     gray_image_1 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
     gray_image_2 = cv2.GaussianBlur(gray_frame_old, (5, 5), 0)
-
 
     # cv2.accumulateWeighted(gray_image, rememberFrame, 0.5)
     # frame_delta = cv2.absdiff(gray_image, cv2.convertScaleAbs(rememberFrame))
