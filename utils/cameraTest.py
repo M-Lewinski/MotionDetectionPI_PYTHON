@@ -87,7 +87,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         return grayImage.astype("float"),target,summary
     # cv2.accumulateWeighted(grayImage, rememberFrame, 0.5)
     frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
-    thresh = cv2.threshold(frameDelta, 40, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
     if summary is None:
         # summary = np.array(thresh)
@@ -144,12 +144,11 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
 
 def TrackingTest2(config):
     camera = cv2.VideoCapture(0)
-
     remember_frame = None
     start_time = None
     summary = None
     current_count = 0
-    frame_count = 5
+    frame_count = 3
     found = False
     while True:
         ok, image = camera.read()
