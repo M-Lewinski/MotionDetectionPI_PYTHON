@@ -123,12 +123,9 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         if target is None:
             target = fig
         else:
-            # if target['distance'] < fig['distance']:
-            # if abs(target["delta_x"] * target["delta_y"]) < abs(fig["delta_x"] * fig["delta_y"]):
             if target['area'] < fig['area']:
                 target = fig
-        # cv2.rectangle(image, (fig['Pos_x'], fig['width']), (fig['Pos_x'] + fig['Pos_y'], fig['width']+ fig['height']), (0, 255, 0), 2)
-        # cv2.rectangle(image, (fig['Pos_x'], fig['Pos_y']), (fig['Pos_x'] + fig['width'], fig['Pos_y']+ fig['height']), (0, 255, 0), 2)
+        # cv2.rectangle(image, (fig['Pos_x'], fig['Pos_y']), (fig['Pos_x'] + fig['width'], fig['Pos_y']+ fig['height']), (0, 255, 255), 2)
     if target is not None:
         if abs(target['delta_x']) > config['delta'] or abs(target['delta_y']) > config['delta']:
             # if abs(target['delta_x']) < config['delta']: target['delta_x'] = 0.0
@@ -145,11 +142,11 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
 
 
 
-
 def TrackingTest2(config):
+    camera = cv2.VideoCapture(0)
+
     remember_frame = None
     start_time = None
-    camera = cv2.VideoCapture(0)
     summary = None
     current_count = 0
     frame_count = 5
