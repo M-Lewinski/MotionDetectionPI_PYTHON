@@ -151,6 +151,9 @@ def TrackingTest2(config):
     frame_count = 3
     found = False
     while True:
+        if(current_count == 0):
+            # remember_frame = None
+            summary = None
         ok, image = camera.read()
         remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary)
         current_count += 1
