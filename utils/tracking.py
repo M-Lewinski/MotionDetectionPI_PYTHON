@@ -29,6 +29,9 @@ def camera_control(config):
     found = False
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         image = frame.array
+        if(current_count == 0):
+            # remember_frame = None
+            summary = None
         remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary)
         current_count += 1
         # if remember_frame is None:
