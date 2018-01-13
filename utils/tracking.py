@@ -24,7 +24,7 @@ def camera_control(config):
         if(current_count == 0):
             # remember_frame = None
             summary = None
-        remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary)
+        remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary,show_video)
         current_count += 1
         # if remember_frame is None:
         #     remember_frame = new_frame
