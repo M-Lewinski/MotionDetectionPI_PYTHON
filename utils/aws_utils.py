@@ -27,8 +27,8 @@ def upload_image_s3(image_path, file_key):
     bucket.upload_file(image_path, file_key)
 
 
-def save_and_upload_image(image):
-    path = "predator_capture_{}".format(str(datetime.datetime.now()))
+def save_and_upload_image(image, x):
+    path = "predator_capture_{}.jpg".format(str(datetime.datetime.now()))
     os_path = "{}{}".format(BASE_PATH, path)
     cv2.imwrite(os_path, image)
     upload_image_s3(os_path, path)
@@ -48,7 +48,7 @@ class AWSPredator:
         now = datetime.datetime.now()
         if self.last_s3_image_time is None or (now-self.last_s3_image_time).total_seconds() > IMAGE_UPLOAD_TIME_SEC:
             self.last_s3_image_time = now
-            t = threading.Thread(target=save_and_upload_image, args=image)
+            t = threading.Thread(target=save_and_upload_image, args=(image, None))
             t.start()
 
         if self.last_sns_time is None or (now-self.last_sns_time).total_seconds() > SNS_NOTIFICATION_TIME_SEC:
