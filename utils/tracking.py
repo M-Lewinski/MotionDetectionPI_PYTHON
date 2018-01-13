@@ -1,34 +1,24 @@
 import cv2
-import copy
-import math
 import datetime
 import time
-import numpy as np
-from utils.fps import FPS
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 from utils.motion import Movement
 from utils.cameraTest import findMotion
+from utils.CameraRawCapture import PiVideoStream
 
 def camera_control(config):
     # Pi configuration and calibration
     movement = Movement()
     movement.calibrate()
-    camera = PiCamera()
-    res = tuple(config["resolution"])
-    camera.resolution = res
-    camera.framerate = config["fps"]
-    rawCapture = PiRGBArray(camera, size=res)
+    video_stream = PiVideoStream(config).start()
     time.sleep(config["camera_warmup_time"])
-
     remember_frame = None
     start_time = None
     summary = None
     current_count = 0
     frame_count = 5
     found = False
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        image = frame.array
+    while True:
+        image = video_stream.read_frame()
         if(current_count == 0):
             # remember_frame = None
             summary = None
@@ -66,9 +56,9 @@ def camera_control(config):
         current_count = current_count % (frame_count+1)
         if config['show_video'] is True:
             cv2.imshow("Primary", image)
-        rawCapture.truncate(0)  # Clear capture for the next frame
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
+    video_stream.stop()
     movement.clean_up()
     cv2.destroyAllWindows()
