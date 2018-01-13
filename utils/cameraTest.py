@@ -79,16 +79,30 @@ def connect_figures(figures):
             new_figures.append(new_fig)
     return new_figures
 
+def GetChannel(image,rememberFrame,channel_number):
+    image_array = np.array(image)
+    remember_array = np.array(rememberFrame)
+    remember_channel = remember_array[:,:,channel_number]
+    channel = image_array[:,:,channel_number]
+    difference = cv2.absdiff(channel,remember_channel)
+    difference = cv2.GaussianBlur(difference,(21,21),0)
+    difference = cv2.dilate(difference, (3,3), iterations=3)
+    return difference
+
 def findMotion(image, rememberFrame, config, current_frame, frame_count, summary, view : CameraView):
     target = None
     image_cpy = copy.copy(image)
     grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
     grayImage = cv2.GaussianBlur(grayImage, (21, 21), 0)
+
     if rememberFrame is None:
-        return grayImage.astype("float"),target,summary
-    # cv2.accumulateWeighted(grayImage, rememberFrame, 0.5)
-    frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
-    view.show_image("absolute diff",frameDelta)
+        return image,target,summary
+    grayImage = cv2.absdiff(grayImage, cv2.convertScaleAbs(cv2.cvtColor(rememberFrame, cv2.COLOR_BGR2GRAY)))
+    frameDelta = GetChannel(image,rememberFrame,2)
+    for i in range(2):
+        frameDelta = cv2.bitwise_and(frameDelta,GetChannel(image,rememberFrame,i))
+    view.show_image("absolute diff",grayImage)
+    view.show_image("summary", frameDelta)
     thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
     if summary is None:
@@ -102,7 +116,6 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
     # summary = np.array(summary) / frame_count
     # summary = summary.astype(np.uint8)
     # summary = cv2.Canny(summary,0,100)
-    view.show_image("summary",summary)
     (_, contours, _) = cv2.findContours(summary.copy(), cv2.RETR_EXTERNAL,
                                         cv2.CHAIN_APPROX_SIMPLE)
     figures = []
@@ -140,7 +153,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         else:
             target = None
         return None, target, summary
-    return grayImage.astype("float"), target, summary
+    return image, target, summary
 
 
 
@@ -152,12 +165,13 @@ def TrackingTest2(config):
     current_count = 0
     frame_count = 3
     found = False
+    show_video = CameraView(config).start()
     while True:
         if(current_count == 0):
             # remember_frame = None
             summary = None
         ok, image = camera.read()
-        remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary)
+        remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary,show_video)
         current_count += 1
         # if remember_frame is None:
         #     remember_frame = new_frame

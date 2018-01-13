@@ -37,7 +37,6 @@ def camera_control(config):
             inBoundries = movement.move(target['angle_x'], target['angle_y'], multiplier=10)
             time.sleep(0.2)
            #movement.laser_off()
-            rememberFrame = None
             if inBoundries is False:
                 movement.center()
             else:
