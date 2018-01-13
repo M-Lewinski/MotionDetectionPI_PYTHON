@@ -87,22 +87,18 @@ def GetChannel(image,rememberFrame,channel_number):
     difference = cv2.absdiff(channel,remember_channel)
     difference = cv2.GaussianBlur(difference,(21,21),0)
     difference = cv2.dilate(difference, (3,3), iterations=3)
+    # cv2.imshow("image " + str(channel_number),difference)
     return difference
 
 def findMotion(image, rememberFrame, config, current_frame, frame_count, summary, view : CameraView):
     target = None
     image_cpy = copy.copy(image)
-    grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
-    grayImage = cv2.GaussianBlur(grayImage, (21, 21), 0)
-
     if rememberFrame is None:
         return image,target,summary
-    grayImage = cv2.absdiff(grayImage, cv2.convertScaleAbs(cv2.cvtColor(rememberFrame, cv2.COLOR_BGR2GRAY)))
-    frameDelta = GetChannel(image,rememberFrame,2)
-    for i in range(2):
-        frameDelta = cv2.bitwise_and(frameDelta,GetChannel(image,rememberFrame,i))
-    view.show_image("absolute diff",grayImage)
-    view.show_image("summary", frameDelta)
+    frameDelta = GetChannel(image_cpy,rememberFrame,2)
+    for i in range(1,2):
+        frameDelta = cv2.bitwise_and(frameDelta,GetChannel(image_cpy,rememberFrame,i))
+    view.show_image("absulate diff", frameDelta)
     thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
     if summary is None:
@@ -116,6 +112,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
     # summary = np.array(summary) / frame_count
     # summary = summary.astype(np.uint8)
     # summary = cv2.Canny(summary,0,100)
+    view.show_image("summary", frameDelta)
     (_, contours, _) = cv2.findContours(summary.copy(), cv2.RETR_EXTERNAL,
                                         cv2.CHAIN_APPROX_SIMPLE)
     figures = []
@@ -195,8 +192,7 @@ def TrackingTest2(config):
                 remember_frame = None
                 found = False
         current_count = current_count % (frame_count+1)
-        if config['show_video'] is True:
-            cv2.imshow("Primary", image)
+        show_video.show_image("Primary", image)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
