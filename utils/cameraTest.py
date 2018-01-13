@@ -87,6 +87,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         return grayImage.astype("float"),target,summary
     # cv2.accumulateWeighted(grayImage, rememberFrame, 0.5)
     frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
+    cv2.imshow("DIFF2", frameDelta)
     thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
     if summary is None:
@@ -99,7 +100,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         return rememberFrame, target,summary
     # summary = np.array(summary) / frame_count
     # summary = summary.astype(np.uint8)
-    #cv2.imshow("DIFF", summary)
+    cv2.imshow("DIFF", summary)
     # summary = cv2.Canny(summary,0,100)
     (_, contours, _) = cv2.findContours(summary.copy(), cv2.RETR_EXTERNAL,
                                         cv2.CHAIN_APPROX_SIMPLE)

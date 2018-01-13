@@ -1,35 +1,26 @@
 import cv2
-import copy
-import math
 import datetime
 import time
-import numpy as np
-from utils.fps import FPS, draw_text
-from picamera.array import PiRGBArray
-from picamera import PiCamera
+from utils.fps import draw_text
+from utils.fps import FPS
 from utils.motion import Movement
 from utils.cameraTest import findMotion
+from utils.CameraRawCapture import PiVideoStream
 
 def camera_control(config):
     # Pi configuration and calibration
     movement = Movement()
     movement.calibrate()
-    camera = PiCamera()
-    res = tuple(config["resolution"])
-    camera.resolution = res
-    camera.framerate = config["fps"]
-    rawCapture = PiRGBArray(camera, size=res)
+    video_stream = PiVideoStream(config).start()
     time.sleep(config["camera_warmup_time"])
-
-    fps_tracker = FPS()
     remember_frame = None
     start_time = None
     summary = None
     current_count = 0
-    frame_count = 5
+    frame_count = 1
     found = False
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        image = frame.array
+    while True:
+        image = video_stream.read_frame()
         if(current_count == 0):
             # remember_frame = None
             summary = None
@@ -42,11 +33,11 @@ def camera_control(config):
             start_time = None
             summary = None
             current_count = 0
+           #movement.laser_on()
             inBoundries = movement.move(target['angle_x'], target['angle_y'], multiplier=10)
-            movement.laser_on()
-            movement.delay(6000)
-            movement.laser_off()
-            movement.delay(6000)
+            time.sleep(0.2)
+           #movement.laser_off()
+            rememberFrame = None
             if inBoundries is False:
                 movement.center()
             else:
@@ -56,8 +47,8 @@ def camera_control(config):
                 start_time = datetime.datetime.now()
             end_time = datetime.datetime.now()
             if (end_time - start_time).total_seconds() >= 1.5:
-                cv2.putText(image, "Tracking failure detected", (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255),
-                            2)
+                print("Tracking failure detected")
+                #cv2.putText(image, "Tracking failure detected", (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255),2)
             if (end_time - start_time).total_seconds() >= 5.0:
                 summary = None
                 current_count = 0
@@ -65,16 +56,12 @@ def camera_control(config):
                 remember_frame = None
                 found = False
         current_count = current_count % (frame_count+1)
-        fps = fps_tracker.fps()
-        print(fps)
         if config['show_video'] is True:
-            fps = fps_tracker.fps()
-            print(fps)
-            draw_text(image, "{:.3f}".format(fps), 30, 30)
+            #draw_text(image, "{:.3f}".format(fps), 30, 30)
             cv2.imshow("Primary", image)
-        rawCapture.truncate(0)  # Clear capture for the next frame
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
+    video_stream.stop()
     movement.clean_up()
     cv2.destroyAllWindows()
