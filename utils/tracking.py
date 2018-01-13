@@ -4,6 +4,7 @@ import time
 from utils.motion import Movement
 from utils.cameraTest import findMotion
 from utils.CameraRawCapture import PiVideoStream
+from utils.aws_utils import AWSPredator
 from utils.CameraView import CameraView
 from utils.fps import FPS
 
@@ -11,6 +12,7 @@ def camera_control(config):
     # Pi configuration and calibration
     movement = Movement()
     movement.calibrate()
+    aws_predator = AWSPredator()
     video_stream = PiVideoStream(config).start()
     time.sleep(config["camera_warmup_time"])
     remember_frame = None
@@ -25,6 +27,7 @@ def camera_control(config):
         fps = fps_counter.fps()
         print(fps)
         image = video_stream.read_frame()
+
         if(current_count == 0):
             summary = None
         remember_frame, target, summary = findMotion(image, remember_frame, config,current_count,frame_count,summary,show_video)
@@ -35,8 +38,10 @@ def camera_control(config):
             summary = None
             current_count = 0
             movement.laser_on()
+
             inBoundries = movement.move(target['angle_x'], target['angle_y'], multiplier=10)
             movement.laser_off()
+            aws_predator.detected_movement(image)
             time.sleep(0.3)
             if inBoundries is False:
                 movement.center()
