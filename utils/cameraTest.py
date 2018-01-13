@@ -3,6 +3,7 @@ import cv2
 import math
 import datetime
 import numpy as np
+from utils.CameraView import CameraView
 
 def rect_distance(fig1,fig2):
     left = fig2['bottom_right_x'] < fig1['top_left_x']
@@ -78,7 +79,7 @@ def connect_figures(figures):
             new_figures.append(new_fig)
     return new_figures
 
-def findMotion(image, rememberFrame, config, current_frame, frame_count, summary):
+def findMotion(image, rememberFrame, config, current_frame, frame_count, summary, view : CameraView):
     target = None
     image_cpy = copy.copy(image)
     grayImage = cv2.cvtColor(image_cpy, cv2.COLOR_BGR2GRAY)
@@ -87,7 +88,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         return grayImage.astype("float"),target,summary
     # cv2.accumulateWeighted(grayImage, rememberFrame, 0.5)
     frameDelta = cv2.absdiff(grayImage, cv2.convertScaleAbs(rememberFrame))
-    cv2.imshow("DIFF2", frameDelta)
+    view.show_image("absolute diff",frameDelta)
     thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
     if summary is None:
@@ -100,8 +101,8 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         return rememberFrame, target,summary
     # summary = np.array(summary) / frame_count
     # summary = summary.astype(np.uint8)
-    cv2.imshow("DIFF", summary)
     # summary = cv2.Canny(summary,0,100)
+    view.show_image("summary",summary)
     (_, contours, _) = cv2.findContours(summary.copy(), cv2.RETR_EXTERNAL,
                                         cv2.CHAIN_APPROX_SIMPLE)
     figures = []

@@ -1,11 +1,10 @@
 import cv2
 import datetime
 import time
-from utils.fps import draw_text
-from utils.fps import FPS
 from utils.motion import Movement
 from utils.cameraTest import findMotion
 from utils.CameraRawCapture import PiVideoStream
+from utils.CameraView import CameraView
 
 def camera_control(config):
     # Pi configuration and calibration
@@ -19,6 +18,7 @@ def camera_control(config):
     current_count = 0
     frame_count = 1
     found = False
+    show_video = CameraView(config).start()
     while True:
         image = video_stream.read_frame()
         if(current_count == 0):
@@ -56,12 +56,9 @@ def camera_control(config):
                 remember_frame = None
                 found = False
         current_count = current_count % (frame_count+1)
-        if config['show_video'] is True:
-            #draw_text(image, "{:.3f}".format(fps), 30, 30)
-            cv2.imshow("Primary", image)
+        show_video.show_image("Primary", image)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
     video_stream.stop()
     movement.clean_up()
-    cv2.destroyAllWindows()
