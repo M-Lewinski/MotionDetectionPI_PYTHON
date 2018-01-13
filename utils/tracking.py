@@ -4,7 +4,7 @@ import math
 import datetime
 import time
 import numpy as np
-from utils.fps import FPS
+from utils.fps import FPS, draw_text
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from utils.motion import Movement
@@ -21,6 +21,7 @@ def camera_control(config):
     rawCapture = PiRGBArray(camera, size=res)
     time.sleep(config["camera_warmup_time"])
 
+    fps_tracker = FPS()
     remember_frame = None
     start_time = None
     summary = None
@@ -64,7 +65,12 @@ def camera_control(config):
                 remember_frame = None
                 found = False
         current_count = current_count % (frame_count+1)
+        fps = fps_tracker.fps()
+        print(fps)
         if config['show_video'] is True:
+            fps = fps_tracker.fps()
+            print(fps)
+            draw_text(image, "{:.3f}".format(fps), 30, 30)
             cv2.imshow("Primary", image)
         rawCapture.truncate(0)  # Clear capture for the next frame
         key = cv2.waitKey(1) & 0xFF

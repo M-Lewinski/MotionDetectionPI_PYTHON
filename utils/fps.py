@@ -42,8 +42,7 @@ class FPS:
         # compute the (approximate) frames per second
         return fps
 
-    @staticmethod
-    def draw_text(frame, text, x, y, color=(120, 255, 0), thickness=2, size=1):
-        if x is not None and y is not None:
-            cv2.putText(
-                frame, text, (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, size, color, thickness)
+def draw_text(frame, text, x, y, color=(120, 255, 0), thickness=2, size=1):
+    if x is not None and y is not None:
+        cv2.putText(
+            frame, text, (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, size, color, thickness)

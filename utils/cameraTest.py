@@ -99,7 +99,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         return rememberFrame, target,summary
     # summary = np.array(summary) / frame_count
     # summary = summary.astype(np.uint8)
-    cv2.imshow("DIFF", summary)
+    #cv2.imshow("DIFF", summary)
     # summary = cv2.Canny(summary,0,100)
     (_, contours, _) = cv2.findContours(summary.copy(), cv2.RETR_EXTERNAL,
                                         cv2.CHAIN_APPROX_SIMPLE)

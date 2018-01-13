@@ -1,7 +1,7 @@
 import argparse
 import json
-# from utils.tracking import camera_control as Tracker
-from utils.cameraTest import TrackingTest2 as Tracker
+from utils.tracking import camera_control as Tracker
+#from utils.cameraTest import TrackingTest2 as Tracker
 
 
 if __name__ == "__main__":
