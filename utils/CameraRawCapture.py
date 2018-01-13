@@ -1,7 +1,6 @@
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from threading import Thread
-from utils.fps import FPS
 import cv2
 
 class PiVideoStream:
@@ -10,12 +9,12 @@ class PiVideoStream:
             res = tuple(config["resolution"])
             self.camera.resolution = res            
             self.camera.framerate = config["fps"]
+            self.camera.exposure_mode = config['camera_mode']
             self.rawCapture = PiRGBArray(self.camera, size=res)
             self.stream = self.stream = self.camera.capture_continuous(self.rawCapture,
 			format="bgr", use_video_port=True)
             self.frame = None
             self.stopped = False
-            self.fps_tracker = FPS()
 
         def start(self):
             Thread(target=self.update, args=()).start()
@@ -25,12 +24,10 @@ class PiVideoStream:
             for f in self.stream:
                 self.frame = f.array
                 self.rawCapture.truncate(0)
-                fps = self.fps_tracker.fps()
-                print(fps)
                 if self.stopped:
                     self.stream.close()
-                    self.rawCapture.Close()
-                    self.camera.Close()
+                    self.rawCapture.close()
+                    self.camera.close()
                     return
 
         def read_frame(self):

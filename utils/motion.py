@@ -20,7 +20,7 @@ class Movement:
 
         # Constant values
         self.STEP = 17.77
-        self.DELAY = 500
+        self.DELAY = 600
         self.MIN_X = -135.0
         self.MIN_Y = -135.0
         self.MAX_X = 120.0
@@ -115,5 +115,5 @@ class Movement:
 
     def clean_up(self):
         GPIO.output(self.MOTOR_ENABLE, GPIO.HIGH)
-        GPIO.cleanup()
+        time.sleep(0.5)
 
