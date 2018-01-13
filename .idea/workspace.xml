@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="acede26d-d5ea-44a8-a169-34142da25c75" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/utils/tracking.py" afterPath="$PROJECT_DIR$/utils/tracking.py" />
+      <change beforePath="$PROJECT_DIR$/utils/CameraView.py" afterPath="$PROJECT_DIR$/utils/CameraView.py" />
     </list>
     <ignored path="MotionDetectionPI_PYTHON.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -70,11 +70,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tracking.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tracking.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/tracking.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="26" column="127" lean-forward="false" selection-start-line="26" selection-start-column="127" selection-end-line="26" selection-end-column="127" />
+            <state relative-caret-position="-159">
+              <caret line="27" column="17" lean-forward="true" selection-start-line="27" selection-start-column="17" selection-end-line="27" selection-end-column="17" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -94,11 +94,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CameraView.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="CameraView.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/utils/CameraView.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+            <state relative-caret-position="557">
+              <caret line="31" column="8" lean-forward="false" selection-start-line="31" selection-start-column="8" selection-end-line="31" selection-end-column="8" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -133,7 +133,7 @@
       <file leaf-file-name="cameraTest.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/cameraTest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="575">
+            <state relative-caret-position="324">
               <caret line="117" column="4" lean-forward="false" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="4" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
@@ -171,9 +171,9 @@
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/utils/CameraRawCapture.py" />
         <option value="$PROJECT_DIR$/json.conf" />
-        <option value="$PROJECT_DIR$/utils/CameraView.py" />
         <option value="$PROJECT_DIR$/utils/cameraTest.py" />
         <option value="$PROJECT_DIR$/utils/tracking.py" />
+        <option value="$PROJECT_DIR$/utils/CameraView.py" />
       </list>
     </option>
   </component>
@@ -1019,10 +1019,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/CameraView.py">
+    <entry file="file://$PROJECT_DIR$/utils/tracking.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+        <state relative-caret-position="-159">
+          <caret line="27" column="17" lean-forward="true" selection-start-line="27" selection-start-column="17" selection-end-line="27" selection-end-column="17" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
@@ -1031,7 +1031,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/cameraTest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="575">
+        <state relative-caret-position="324">
           <caret line="117" column="4" lean-forward="false" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="4" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
@@ -1039,10 +1039,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/tracking.py">
+    <entry file="file://$PROJECT_DIR$/utils/CameraView.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="26" column="127" lean-forward="false" selection-start-line="26" selection-start-column="127" selection-end-line="26" selection-end-column="127" />
+        <state relative-caret-position="557">
+          <caret line="31" column="8" lean-forward="false" selection-start-line="31" selection-start-column="8" selection-end-line="31" selection-end-column="8" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
