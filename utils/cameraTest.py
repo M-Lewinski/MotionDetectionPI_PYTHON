@@ -4,6 +4,7 @@ import math
 import datetime
 import numpy as np
 from utils.CameraView import CameraView
+import threading
 
 def rect_distance(fig1,fig2):
     left = fig2['bottom_right_x'] < fig1['top_left_x']
@@ -79,39 +80,45 @@ def connect_figures(figures):
             new_figures.append(new_fig)
     return new_figures
 
-def GetChannel(image,rememberFrame,channel_number):
+def GetChannel(image,rememberFrame,channel_number,result):
     image_array = np.array(image)
     remember_array = np.array(rememberFrame)
     remember_channel = remember_array[:,:,channel_number]
     channel = image_array[:,:,channel_number]
     difference = cv2.absdiff(channel,remember_channel)
-    difference = cv2.GaussianBlur(difference,(21,21),0)
-    difference = cv2.dilate(difference, (3,3), iterations=3)
-    # cv2.imshow("image " + str(channel_number),difference)
-    return difference
+    difference = cv2.GaussianBlur(difference,(11,11),0)
+    difference = cv2.dilate(difference, (3,3), iterations=2)
+    result[channel_number] = difference
+
+def Thread_get_channel(image,rememberFrame):
+    result = [None]*3
+    threads = []
+    for i in [1,2]:
+        t = threading.Thread(target=GetChannel, args=(image,rememberFrame,i,result))
+        t.start()
+        threads.append(t)
+    for i in range(len(threads)):
+        threads[i].join()
+    return (result[1] + result[2])//2
 
 def findMotion(image, rememberFrame, config, current_frame, frame_count, summary, view : CameraView):
     target = None
     image_cpy = copy.copy(image)
     if rememberFrame is None:
         return image,target,summary
-    frameDelta = GetChannel(image_cpy,rememberFrame,2)
-    for i in range(1,2):
-        frameDelta = cv2.bitwise_and(frameDelta,GetChannel(image_cpy,rememberFrame,i))
+   # frameDelta = GetChannel(image_cpy,rememberFrame,2)
+   # for i in range(1,2):
+   #     frameDelta = (frameDelta+GetChannel(image_cpy,rememberFrame,i))//2
+    frameDelta = Thread_get_channel(image,rememberFrame)  
     view.show_image("absulate diff", frameDelta)
-    thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(frameDelta,50, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
     if summary is None:
-        # summary = np.array(thresh)
         summary = thresh
     else:
-        # summary = summary + np.array(thresh)
         summary = cv2.bitwise_or(summary,thresh)
     if current_frame < frame_count:
         return rememberFrame, target,summary
-    # summary = np.array(summary) / frame_count
-    # summary = summary.astype(np.uint8)
-    # summary = cv2.Canny(summary,0,100)
     view.show_image("summary", frameDelta)
     (_, contours, _) = cv2.findContours(summary.copy(), cv2.RETR_EXTERNAL,
                                         cv2.CHAIN_APPROX_SIMPLE)
@@ -120,12 +127,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         if cv2.contourArea(c) < config["min_area"]:
             continue
         pos_x, pos_y, width, height = cv2.boundingRect(c)
-        # interserct = False
-        # if not interserct:
         figures.append({'Pos_x': pos_x, 'Pos_y': pos_y, 'width': width, 'height': height})
-    # if len(figures) > 0:
-    #    rememberFrame = None
-    # print(figures)
     figures = connect_figures(figures)
     for fig in figures:
         fig['delta_x'] = (fig['Pos_x'] + (fig['width'] / 2)) - (config["resolution"][0] / 2)
@@ -137,7 +139,7 @@ def findMotion(image, rememberFrame, config, current_frame, frame_count, summary
         else:
             if target['area'] < fig['area']:
                 target = fig
-        # cv2.rectangle(image, (fig['Pos_x'], fig['Pos_y']), (fig['Pos_x'] + fig['width'], fig['Pos_y']+ fig['height']), (0, 255, 255), 2)
+        #cv2.rectangle(image, (fig['Pos_x'], fig['Pos_y']), (fig['Pos_x'] + fig['width'], fig['Pos_y']+ fig['height']), (0, 255, 255), 2)
     if target is not None:
         if abs(target['delta_x']) > config['delta'] or abs(target['delta_y']) > config['delta']:
             # if abs(target['delta_x']) < config['delta']: target['delta_x'] = 0.0
